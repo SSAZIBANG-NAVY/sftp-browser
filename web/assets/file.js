@@ -245,11 +245,13 @@ const updatePreview = async() => {
             editor = CodeMirror(elPreview, {
                 value: text,
                 lineNumbers: true,
-                lineWrapping: true,
-                scrollPastEnd: true,
+                lineWrapping: false, // 줄 바꿈을 하지 않음
+                scrollPastEnd: false, // 스크롤시 끝까지 표시하도록 설정
                 styleActiveLine: true,
                 autoCloseBrackets: true,
-                mode: extInfo.codeMirrorMode
+                mode: extInfo.codeMirrorMode,
+                indentUnit: 2,
+              	viewportMargin: Infinity // 모든 라인 한 번에 표시
             });
             const elEditor = $('.CodeMirror', elPreview);
             // Load CodeMirror mode
@@ -258,7 +260,8 @@ const updatePreview = async() => {
                 CodeMirror.requireMode(extInfo.codeMirrorMode, () => {}, {
                     path: determinedMode => {
                         mode = determinedMode;
-                        return `https://codemirror.net/5/mode/${determinedMode}/${determinedMode}.js`;
+                        return `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.10.0/mode/${determinedMode}/${determinedMode}.min.js`
+                        //return `https://codemirror.net/5/mode/${determinedMode}/${determinedMode}.js`;
                     }
                 });
                 CodeMirror.autoLoadMode(editor, mode);
@@ -290,6 +293,11 @@ const updatePreview = async() => {
                     <input type="checkbox">
                     <span>Word wrap</span>
                 </label>
+                <div class="sep"></div>
+				<input type="text" id="searchBox" class="textbox" placeholder="Search..." onkeydown="if (event.key === 'Enter') searchText();" style="width: 20%;">
+				<button class="btn small secondary" id="prevButton" onclick="navigate('prev')">< Prev</button>
+				<span id="statusText">0/0</span>
+				<button class="btn small secondary" id="nextButton" onclick="navigate('next')">Next ></button>
             `);
             // Set up the save button
             const btnSave = $('.btn.save', elControls);

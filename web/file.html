@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Viewer</title>
     <meta name="description" content="Connect to and manage files on your SFTP server with ease!">
     <meta name="mobile-web-app-capable" content="yes">
@@ -14,6 +14,11 @@
     <link rel="stylesheet" href="https://src.simplecyber.org/v2/themes.css">
     <link rel="stylesheet" href="https://src.simplecyber.org/v2/base.css">
     <link rel="stylesheet" href="/assets/main.css">
+    <style>
+    .highlight {
+      	background-color: #ffff0024 !important;
+    }
+    </style>
     <script defer src="https://src.simplecyber.org/lib/axios.min.js"></script>
     <script defer src="https://src.simplecyber.org/lib/tabbable.min.js"></script>
     <script defer src="https://src.simplecyber.org/lib/focus-trap.min.js"></script>
@@ -56,5 +61,62 @@
             Loading file...
         </div>
     </div>
+  	<script>
+    let highlightedSections = [];
+    let currentIndex = -1;
+
+    function searchText() {
+        const searchTerm = document.getElementById('searchBox')?.value.toLowerCase();
+        const sections = document.querySelectorAll('pre.CodeMirror-line');
+
+        sections.forEach(section => {
+            section.classList.remove('highlight');
+        });
+
+        if (!searchTerm) return;
+
+        highlightedSections = [];
+        currentIndex = -1;
+
+        sections.forEach((section, index) => {
+            const text = section.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                section.classList.add('highlight');
+                highlightedSections.push(section);
+            }
+        });
+
+        if (highlightedSections.length > 0) {
+            currentIndex = 0;
+            updateStatus();
+            highlightedSections[currentIndex].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        } else {
+            document.getElementById('statusText').textContent = '0/0';
+        }
+    }
+
+    function navigate(direction) {
+        if (highlightedSections.length === 0) return;
+
+        if (direction === 'prev' && currentIndex > 0) {
+            currentIndex--;
+        } else if (direction === 'next' && currentIndex < highlightedSections.length - 1) {
+            currentIndex++;
+        }
+
+        updateStatus();
+        highlightedSections[currentIndex].scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+    }
+
+    function updateStatus() {
+        document.getElementById('statusText').textContent = `${currentIndex + 1}/${highlightedSections.length}`;
+    }
+  	</script>
 </body>
 </html>
