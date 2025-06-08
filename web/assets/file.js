@@ -292,6 +292,31 @@ const updatePreview = async () => {
           scrollBeyondLastLine: false,
         });
 
+        async function formatCode() {
+          const code = editor.getValue();
+          let lang = editor.getModel().getLanguageId();
+          let parser = "babel";
+          if (lang === "typescript") parser = "typescript";
+          else if (lang === "html") parser = "html";
+
+          const formatted = await prettier.format(code, {
+            parser,
+            plugins: prettierPlugins,
+            tabWidth: 2,
+            singleQuote: true,
+            semi: true,
+          });
+
+          editor.setValue(formatted);
+        }
+
+        window.addEventListener("keydown", (e) => {
+          if (e.ctrlKey && e.altKey && e.key.toLowerCase() === "f") {
+            e.preventDefault();
+            formatCode();
+          }
+        });
+
         editor.onDidChangeModelContent(() => {
           btnSave.disabled = false;
           btnSave.classList.add("info");
