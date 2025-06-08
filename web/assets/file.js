@@ -1,23 +1,23 @@
-const elNavBar = $("#navbar");
-const elControls = $("#controls");
-const elPreview = $("#preview");
-const btnDownload = $("#download");
+const elNavBar = $('#navbar');
+const elControls = $('#controls');
+const elPreview = $('#preview');
+const btnDownload = $('#download');
 const query = new URLSearchParams(window.location.search);
-let path = query.get("path");
-activeConnection = connections[query.get("con")];
+let path = query.get('path');
+activeConnection = connections[query.get('con')];
 let fileStats = null;
 let editor;
 
 function getLang(path) {
-  const filename = path.split("/").pop();
-  const parts = filename.split(".");
-  if (parts.length === 1) return "";
+  const filename = path.split('/').pop();
+  const parts = filename.split('.');
+  if (parts.length === 1) return '';
   const ext = parts.pop().toLowerCase();
   const map = {
-    js: "javascript",
-    ts: "typescript",
-    py: "python",
-    md: "markdown",
+    js: 'javascript',
+    ts: 'typescript',
+    py: 'python',
+    md: 'markdown',
   };
   return map[ext] || ext;
 }
@@ -33,8 +33,8 @@ const updatePreview = async () => {
     const startTime = Date.now();
     let lastUpdate = 0;
     const blob = await api.request(
-      "get",
-      "files/get/single",
+      'get',
+      'files/get/single',
       {
         path: path,
       },
@@ -50,7 +50,7 @@ const updatePreview = async () => {
           progress,
         );
       },
-      "blob",
+      'blob',
     );
     fileUrl = URL.createObjectURL(blob);
   } catch (error) {
@@ -59,14 +59,14 @@ const updatePreview = async () => {
   elPreview.classList.add(extInfo.type);
   const statusHtmlSegments = [];
   switch (extInfo.type) {
-    case "image": {
-      const image = document.createElement("img");
+    case 'image': {
+      const image = document.createElement('img');
       image.src = fileUrl;
       await new Promise((resolve) => {
-        image.addEventListener("load", resolve);
+        image.addEventListener('load', resolve);
       });
       elControls.insertAdjacentHTML(
-        "beforeend",
+        'beforeend',
         `
                 <button class="zoomOut btn small secondary iconOnly" title="Zoom out">
                     <div class="icon">zoom_out</div>
@@ -84,11 +84,11 @@ const updatePreview = async () => {
                 </button>
             `,
       );
-      const btnZoomOut = $(".btn.zoomOut", elControls);
-      const btnZoomIn = $(".btn.zoomIn", elControls);
-      const btnFit = $(".btn.fit", elControls);
-      const btnReal = $(".btn.real", elControls);
-      const elZoom = $(".zoom", elControls);
+      const btnZoomOut = $('.btn.zoomOut', elControls);
+      const btnZoomIn = $('.btn.zoomIn', elControls);
+      const btnFit = $('.btn.fit', elControls);
+      const btnReal = $('.btn.real', elControls);
+      const elZoom = $('.zoom', elControls);
       let fitPercent = 100;
       const setZoom = (percent) => {
         const minZoom = fitPercent;
@@ -103,7 +103,7 @@ const updatePreview = async () => {
         image.style.height = `${scaledSize.height}px`;
       };
       const changeZoom = (percentChange) => {
-        const zoom = parseInt(elZoom.innerText.replace("%", ""));
+        const zoom = parseInt(elZoom.innerText.replace('%', ''));
         setZoom(zoom + percentChange);
       };
       const fitImage = () => {
@@ -118,22 +118,22 @@ const updatePreview = async () => {
         }
         fitPercent = Math.min(fitPercent, 100);
         setZoom(fitPercent);
-        image.style.marginTop = "";
-        image.style.marginLeft = "";
+        image.style.marginTop = '';
+        image.style.marginLeft = '';
       };
-      btnZoomIn.addEventListener("click", () => {
+      btnZoomIn.addEventListener('click', () => {
         changeZoom(10);
       });
-      btnZoomOut.addEventListener("click", () => {
+      btnZoomOut.addEventListener('click', () => {
         changeZoom(-10);
       });
-      btnFit.addEventListener("click", () => {
+      btnFit.addEventListener('click', () => {
         fitImage();
       });
-      btnReal.addEventListener("click", () => {
+      btnReal.addEventListener('click', () => {
         setZoom(100);
       });
-      elPreview.addEventListener("wheel", (e) => {
+      elPreview.addEventListener('wheel', (e) => {
         if (getIsMobileDevice()) return;
         e.preventDefault();
         const previewRect = elPreview.getBoundingClientRect();
@@ -191,19 +191,19 @@ const updatePreview = async () => {
       let startCoords = {};
       let startScroll = {};
       let isMouseDown = false;
-      elPreview.addEventListener("mousedown", (e) => {
+      elPreview.addEventListener('mousedown', (e) => {
         if (getIsMobileDevice()) return;
         e.preventDefault();
         startCoords = { x: e.clientX, y: e.clientY };
         startScroll = { x: elPreview.scrollLeft, y: elPreview.scrollTop };
         isMouseDown = true;
-        elPreview.style.cursor = "grabbing";
+        elPreview.style.cursor = 'grabbing';
       });
-      elPreview.addEventListener("dragstart", (e) => {
+      elPreview.addEventListener('dragstart', (e) => {
         if (getIsMobileDevice()) return;
         e.preventDefault();
       });
-      elPreview.addEventListener("mousemove", (e) => {
+      elPreview.addEventListener('mousemove', (e) => {
         if (getIsMobileDevice()) return;
         e.preventDefault();
         if (!isMouseDown) return;
@@ -215,36 +215,36 @@ const updatePreview = async () => {
         elPreview.scrollLeft = newScroll.x;
         elPreview.scrollTop = newScroll.y;
       });
-      elPreview.addEventListener("mouseup", (e) => {
+      elPreview.addEventListener('mouseup', (e) => {
         if (getIsMobileDevice()) return;
         e.preventDefault();
         isMouseDown = false;
-        elPreview.style.cursor = "";
+        elPreview.style.cursor = '';
       });
-      elPreview.addEventListener("mouseleave", (e) => {
+      elPreview.addEventListener('mouseleave', (e) => {
         if (getIsMobileDevice()) return;
         e.preventDefault();
         isMouseDown = false;
-        elPreview.style.cursor = "";
+        elPreview.style.cursor = '';
       });
-      elControls.style.display = "";
-      elPreview.innerHTML = "";
+      elControls.style.display = '';
+      elPreview.innerHTML = '';
       elPreview.appendChild(image);
       statusHtmlSegments.push(
         `<span>${image.naturalWidth}x${image.naturalHeight}</span>`,
       );
       fitImage();
-      window.addEventListener("resize", fitImage);
+      window.addEventListener('resize', fitImage);
       break;
     }
-    case "video": {
-      const video = document.createElement("video");
+    case 'video': {
+      const video = document.createElement('video');
       video.src = fileUrl;
       await new Promise((resolve) => {
-        video.addEventListener("loadedmetadata", resolve);
+        video.addEventListener('loadedmetadata', resolve);
       });
       video.controls = true;
-      elPreview.innerHTML = "";
+      elPreview.innerHTML = '';
       elPreview.appendChild(video);
       video.play();
       statusHtmlSegments.push(`<span>${formatSeconds(video.duration)}</span>`);
@@ -253,40 +253,49 @@ const updatePreview = async () => {
       );
       break;
     }
-    case "audio": {
-      const audio = document.createElement("audio");
+    case 'audio': {
+      const audio = document.createElement('audio');
       audio.src = fileUrl;
       await new Promise((resolve) => {
-        audio.addEventListener("loadedmetadata", resolve);
+        audio.addEventListener('loadedmetadata', resolve);
       });
       audio.controls = true;
-      elPreview.innerHTML = "";
+      elPreview.innerHTML = '';
       elPreview.appendChild(audio);
       audio.play();
       statusHtmlSegments.push(`<span>${formatSeconds(audio.duration)}</span>`);
       break;
     }
-    case "markdown":
-    case "text": {
+    case 'markdown':
+    case 'text': {
       const text = await (await fetch(fileUrl)).text();
 
-      elPreview.innerHTML = "";
-      const monacoContainer = document.createElement("div");
-      monacoContainer.id = "monaco-editor";
-      monacoContainer.style.width = "100%";
-      monacoContainer.style.height = "100%";
+      elPreview.innerHTML = '';
+      const monacoContainer = document.createElement('div');
+      monacoContainer.id = 'monaco-editor';
+      monacoContainer.style.width = '100%';
+      monacoContainer.style.height = '100%';
       elPreview.appendChild(monacoContainer);
 
       require.config({
         paths: {
-          vs: "https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs",
+          vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs',
         },
       });
-      require(["vs/editor/editor.main"], () => {
+      require(['vs/editor/editor.main'], () => {
+        monaco.editor.defineTheme('custom-vs-dark', {
+          base: 'vs-dark',
+          inherit: true,
+          rules: [],
+          colors: {
+            'editor.background': '#171d26',
+          },
+        });
+
         editor = monaco.editor.create(monacoContainer, {
           value: text,
           language: getLang(path),
-          theme: "vs-dark",
+          theme: 'custom-vs-dark',
           fontSize: 16,
           automaticLayout: true,
           scrollBeyondLastLine: false,
@@ -295,9 +304,9 @@ const updatePreview = async () => {
         async function formatCode() {
           const code = editor.getValue();
           let lang = editor.getModel().getLanguageId();
-          let parser = "babel";
-          if (lang === "typescript") parser = "typescript";
-          else if (lang === "html") parser = "html";
+          let parser = 'babel';
+          if (lang === 'typescript') parser = 'typescript';
+          else if (lang === 'html') parser = 'html';
 
           const formatted = await prettier.format(code, {
             parser,
@@ -310,8 +319,8 @@ const updatePreview = async () => {
           editor.setValue(formatted);
         }
 
-        window.addEventListener("keydown", (e) => {
-          if (e.ctrlKey && e.altKey && e.key.toLowerCase() === "f") {
+        window.addEventListener('keydown', (e) => {
+          if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'f') {
             e.preventDefault();
             formatCode();
           }
@@ -319,18 +328,18 @@ const updatePreview = async () => {
 
         editor.onDidChangeModelContent(() => {
           btnSave.disabled = false;
-          btnSave.classList.add("info");
-          btnSaveText.innerText = "Save";
+          btnSave.classList.add('info');
+          btnSaveText.innerText = 'Save';
         });
 
-        btnSave.addEventListener("click", async () => {
+        btnSave.addEventListener('click', async () => {
           if (btnSave.disabled) return;
-          btnSaveText.innerText = "Saving...";
+          btnSaveText.innerText = 'Saving...';
           btnSave.disabled = true;
-          btnSave.classList.remove("info");
+          btnSave.classList.remove('info');
           const res1 = {};
           const res2 = await api.post(
-            "files/create",
+            'files/create',
             {
               path: path,
             },
@@ -338,47 +347,47 @@ const updatePreview = async () => {
           );
           if (res1.error || res2.error) {
             setStatus(`Error: ${res2.error || res1.error}`, true);
-            btnSaveText.innerText = "Save";
+            btnSaveText.innerText = 'Save';
             btnSave.disabled = false;
-            btnSave.classList.add("info");
+            btnSave.classList.add('info');
           } else {
-            btnSaveText.innerText = "Saved!";
+            btnSaveText.innerText = 'Saved!';
             await getUpdatedStats();
             setStatusWithDetails();
           }
         });
 
-        window.addEventListener("keydown", (e) => {
-          if (e.ctrlKey && e.code === "KeyS") {
+        window.addEventListener('keydown', (e) => {
+          if (e.ctrlKey && e.code === 'KeyS') {
             e.preventDefault();
             btnSave.click();
           }
         });
       });
-      
-      const btnSave = $(".btn.save", elControls);
-      const btnSaveText = $("span", btnSave);
-      const btnTextSmaller = $(".btn.textSmaller", elControls);
-      const btnTextBigger = $(".btn.textBigger", elControls);
-      const elTextSize = $(".textSize", elControls);
-      let size = parseInt(window.localStorage.getItem("textEditorSize")) || 18;
+
+      const btnSave = $('.btn.save', elControls);
+      const btnSaveText = $('span', btnSave);
+      const btnTextSmaller = $('.btn.textSmaller', elControls);
+      const btnTextBigger = $('.btn.textBigger', elControls);
+      const elTextSize = $('.textSize', elControls);
+      let size = parseInt(window.localStorage.getItem('textEditorSize')) || 18;
 
       const updateTextSize = () => {
         editor.updateOptions({ fontSize: size });
         elTextSize.innerText = size;
-        window.localStorage.setItem("textEditorSize", size);
+        window.localStorage.setItem('textEditorSize', size);
       };
 
-      btnTextSmaller.addEventListener("click", () => {
+      btnTextSmaller.addEventListener('click', () => {
         size--;
         updateTextSize();
       });
-      btnTextBigger.addEventListener("click", () => {
+      btnTextBigger.addEventListener('click', () => {
         size++;
         updateTextSize();
       });
 
-      elControls.style.display = "";
+      elControls.style.display = '';
       break;
     }
     default: {
@@ -390,7 +399,7 @@ const updatePreview = async () => {
     setStatus(`
             <div class="row flex-wrap" style="gap: 2px 20px">
                 <span>${formatSize(fileStats.size)}</span>
-                ${statusHtmlSegments.join("\n")}
+                ${statusHtmlSegments.join('\n')}
                 <span>${extInfo.mime}</span>
                 <span>${getRelativeDate(fileStats.modifyTime)}</span>
             </div>
@@ -402,34 +411,34 @@ const updatePreview = async () => {
 
 const getUpdatedStats = async () => {
   // Stat file
-  const res = await api.get("files/stat", {
+  const res = await api.get('files/stat', {
     path: path,
   });
   fileStats = res.stats;
   return res;
 };
 
-window.addEventListener("load", async () => {
+window.addEventListener('load', async () => {
   const res = await getUpdatedStats();
   if (!res.error) {
     // Update navbar
     path = res.path;
     document.title = `${path}`;
-    const pathSplit = path.split("/");
-    const folderPath = `${pathSplit.slice(0, pathSplit.length - 1).join("/")}/`;
+    const pathSplit = path.split('/');
+    const folderPath = `${pathSplit.slice(0, pathSplit.length - 1).join('/')}/`;
     const fileName = pathSplit[pathSplit.length - 1];
-    $(".path", elNavBar).innerText = folderPath;
-    $(".name", elNavBar).innerText = fileName;
+    $('.path', elNavBar).innerText = folderPath;
+    $('.name', elNavBar).innerText = fileName;
     updatePreview(fileName);
   } else {
     return setStatus(`Error: ${res.error}`, true);
   }
 });
 
-btnDownload.addEventListener("click", async () => {
-  const fileName = $(".name", elNavBar).innerText;
-  const elSrc = $("img, video, audio", elPreview);
-  const elText = $("textarea", elPreview);
+btnDownload.addEventListener('click', async () => {
+  const fileName = $('.name', elNavBar).innerText;
+  const elSrc = $('img, video, audio', elPreview);
+  const elText = $('textarea', elPreview);
   if (elSrc) {
     console.log(`Starting download using downloaded blob`);
     return downloadUrl(elSrc.src, fileName);
@@ -447,8 +456,8 @@ btnDownload.addEventListener("click", async () => {
 
 // Let the window finish displaying itself before saving size
 setTimeout(() => {
-  window.addEventListener("resize", () => {
-    window.localStorage.setItem("viewerWidth", window.innerWidth);
-    window.localStorage.setItem("viewerHeight", window.innerHeight);
+  window.addEventListener('resize', () => {
+    window.localStorage.setItem('viewerWidth', window.innerWidth);
+    window.localStorage.setItem('viewerHeight', window.innerHeight);
   });
 }, 2000);
