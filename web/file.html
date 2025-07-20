@@ -43,6 +43,24 @@
     <script src="https://unpkg.com/prettier@3.5.3/plugins/html.js"></script>
     <script src="https://unpkg.com/prettier@3.5.3/plugins/babel.js"></script>
     <script src="https://unpkg.com/prettier@3.5.3/plugins/typescript.js"></script>
+
+    <link rel="stylesheet" href="https://ssh.syu.kr/xterm/css/xterm.css" />
+    <script src="https://ssh.syu.kr/xterm/lib/xterm.js"></script>
+    <script src="https://ssh.syu.kr//socket.io/socket.io.js"></script>
+    <style>
+      #sshTerminalContainer {
+        display: block;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, opacity 0.4s ease;
+      }
+
+      #sshTerminalContainer.visible {
+        max-height: 500px;
+        opacity: 1;
+      }
+    </style>
   </head>
 
   <body class="darkmuted">
@@ -87,6 +105,14 @@
         <button class="textBigger btn small secondary iconOnly">
           <div class="icon">text_increase</div>
         </button>
+        <div class="sep"></div>
+        <button
+          id="sshButton"
+          class="btn small iconOnly"
+          title="Open SSH Terminal"
+        >
+          <div class="icon">terminal</div>
+        </button>
       </div>
       <div id="preview" class="row flex-grow align-center justify-center">
         <div class="spinner" style="margin: auto"></div>
@@ -95,6 +121,105 @@
       <div id="statusBar" class="row align-center flex-no-shrink">
         Loading file...
       </div>
+
+      <div id="sshTerminalContainer" style="height: 410px;">
+        <div
+          id="terminal"
+          style="width: 100%; height: 100%; background: black;"
+        ></div>
+      </div>
     </div>
+    <script>
+      let socket = null;
+      let isConnected = false;
+
+      document.getElementById('sshButton').addEventListener('click', () => {
+        const container = document.getElementById('sshTerminalContainer');
+        const isVisible = container.classList.contains('visible');
+
+        if (isVisible) {
+          container.classList.remove('visible');
+        } else {
+          container.classList.add('visible');
+
+          if (!isConnected) {
+            isConnected = true;
+
+            socket = io('https://ssh.syu.kr', {
+              withCredentials: true,
+            });
+            term.onData((data) => {
+              socket.emit('data', data);
+            });
+            socket.on('output', (data) => {
+              term.write(data);
+            });
+            socket.on('status', (status) => {
+              console.log('SSH 상태:', status);
+            });
+
+            connectSSHFromStorage();
+          }
+        }
+
+        // if (!isVisible) {
+        //   connectSSHFromStorage();
+        // } else {
+        //   container.style.display = "none";
+        //   socket.emit("disconnectSSH");
+        //   term.clear();
+        // }
+      });
+    </script>
+    <script>
+      const term = new Terminal();
+      term.open(document.getElementById('terminal'));
+
+      // const socket = io('https://ssh.syu.kr', {
+      //   withCredentials: true,
+      // });
+
+      // term.onData((data) => {
+      //   socket.emit('data', data);
+      // });
+
+      // socket.on('output', (data) => {
+      //   term.write(data);
+      // });
+
+      // socket.on('status', (status) => {
+      //   console.log('SSH 상태:', status);
+      // });
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const con = urlParams.get('con');
+      const cons = JSON.parse(localStorage.connections);
+
+      function connectSSHFromStorage() {
+        const host = cons[con].host;
+        const port = parseInt(cons[con].port, 10);
+        const username = cons[con].username;
+        const password = cons[con].password;
+
+        if (!host || !port || !username || !password) {
+          term.write('접속 실패\r\n');
+          return;
+        }
+
+        term.write(`Connecting to ${host}:${port} as ${username}...\r\n`);
+        term.clear();
+
+        socket.emit('connectSSH', {
+          host,
+          port,
+          username,
+          password,
+        });
+      }
+
+      // document.addEventListener('DOMContentLoaded', () => {
+      //   connectSSHFromStorage();
+      // });
+    </script>
   </body>
 </html>
