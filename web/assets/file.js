@@ -370,7 +370,7 @@ const updatePreview = async () => {
       const btnTextSmaller = $('.btn.textSmaller', elControls);
       const btnTextBigger = $('.btn.textBigger', elControls);
       const elTextSize = $('.textSize', elControls);
-      let size = parseInt(window.localStorage.getItem('textEditorSize')) || 18;
+      let size = parseInt(window.localStorage.getItem('textEditorSize')) || 16;
 
       const updateTextSize = () => {
         editor.updateOptions({ fontSize: size });
